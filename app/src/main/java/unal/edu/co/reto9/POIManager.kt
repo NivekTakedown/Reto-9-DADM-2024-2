@@ -23,7 +23,11 @@ class POIManager(private val mapView: MapView) {
                             val lat = element.lat
                             val lon = element.lon
                             val name = element.tags?.name ?: "Unknown"
-                            addMarker(lat, lon, name)
+                            val description = element.tags?.description ?: "No description available"
+                            val amenity = element.tags?.amenity ?: "No amenity available"
+                            val openingHours = element.tags?.opening_hours ?: "No opening hours available"
+                            val phone = element.tags?.phone ?: "No phone number available"
+                            addMarker(lat, lon, name, description, amenity, openingHours, phone)
                         }
                     }
                 } else {
@@ -36,11 +40,14 @@ class POIManager(private val mapView: MapView) {
         }
     }
 
-    private fun addMarker(latitude: Double, longitude: Double, name: String) {
+    private fun addMarker(latitude: Double, longitude: Double, name: String, description: String, amenity: String, openingHours: String, phone: String) {
         val marker = Marker(mapView)
         marker.position = GeoPoint(latitude, longitude)
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
         marker.title = name
+        marker.snippet = description
+        marker.subDescription = "Amenity: $amenity\nOpening Hours: $openingHours\nPhone: $phone"
+        marker.infoWindow = CustomInfoWindow(mapView)
         mapView.overlays.add(marker)
         mapView.invalidate() // Refresh the map to show the new marker
     }

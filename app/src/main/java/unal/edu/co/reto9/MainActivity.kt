@@ -16,7 +16,7 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import android.widget.Button
 import org.osmdroid.views.overlay.Marker
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), RadiusDialogFragment.RadiusDialogListener, POITypeDialogFragment.POITypeDialogListener {
 
     private lateinit var mapView: MapView
     private val REQUEST_LOCATION_PERMISSION = 1
@@ -57,6 +57,12 @@ class MainActivity : AppCompatActivity() {
             } else {
                 requestLocationPermission()
             }
+        }
+
+        // Button to Select POI Types
+        val btnSelectPOITypes = findViewById<Button>(R.id.btnSelectPOITypes)
+        btnSelectPOITypes.setOnClickListener {
+            showPOITypeDialog()
         }
     }
 
@@ -106,13 +112,21 @@ class MainActivity : AppCompatActivity() {
     private fun fetchPOIs(latitude: Double, longitude: Double) {
         val sharedPreferences = getSharedPreferences("app_prefs", MODE_PRIVATE)
         val radius = sharedPreferences.getInt("search_radius", 1000)
+        val poiTypes = sharedPreferences.getStringSet("poi_types", setOf("restaurant")) ?: setOf("restaurant")
         val poiManager = POIManager(mapView)
-        poiManager.fetchPOIs(latitude, longitude, radius, "restaurant") // Example: Fetch restaurants within the configured radius
+        for (type in poiTypes) {
+            poiManager.fetchPOIs(latitude, longitude, radius, type)
+        }
     }
 
     private fun showRadiusDialog() {
         val dialog = RadiusDialogFragment()
         dialog.show(supportFragmentManager, "RadiusDialogFragment")
+    }
+
+    private fun showPOITypeDialog() {
+        val dialog = POITypeDialogFragment()
+        dialog.show(supportFragmentManager, "POITypeDialogFragment")
     }
 
     private fun addDeviceLocationMarker(latitude: Double, longitude: Double) {
@@ -124,6 +138,24 @@ class MainActivity : AppCompatActivity() {
         }
         deviceLocationMarker?.position = GeoPoint(latitude, longitude)
         mapView.invalidate() // Refresh the map to show the new marker
+    }
+
+    override fun onRadiusUpdated() {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                fetchPOIs(location.latitude, location.longitude)
+            }
+        }
+    }
+
+    override fun onPOITypesUpdated() {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                fetchPOIs(location.latitude, location.longitude)
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(

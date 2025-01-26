@@ -11,5 +11,9 @@ data class Element(
 )
 
 data class Tags(
-    val name: String?
+    val name: String?,
+    val description: String?, // Existing field
+    val amenity: String?, // New field
+    val opening_hours: String?, // New field
+    val phone: String? // New field
 )

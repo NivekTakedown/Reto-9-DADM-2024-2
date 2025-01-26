@@ -11,6 +11,20 @@ import com.google.android.material.textfield.TextInputEditText
 class RadiusDialogFragment : DialogFragment() {
 
     private lateinit var sharedPreferences: SharedPreferences
+    private var listener: RadiusDialogListener? = null
+
+    interface RadiusDialogListener {
+        fun onRadiusUpdated()
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is RadiusDialogListener) {
+            listener = context
+        } else {
+            throw RuntimeException("$context must implement RadiusDialogListener")
+        }
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         sharedPreferences = requireActivity().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
@@ -24,8 +38,14 @@ class RadiusDialogFragment : DialogFragment() {
             .setPositiveButton("Save") { _, _ ->
                 val radius = radiusInput.text.toString().toIntOrNull() ?: 1000
                 sharedPreferences.edit().putInt("search_radius", radius).apply()
+                listener?.onRadiusUpdated()
             }
             .setNegativeButton("Cancel", null)
             .create()
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
     }
 }
