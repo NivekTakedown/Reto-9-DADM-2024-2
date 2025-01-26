@@ -14,11 +14,13 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.gms.location.LocationServices
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import android.widget.Button
+import org.osmdroid.views.overlay.Marker
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var mapView: MapView
     private val REQUEST_LOCATION_PERMISSION = 1
+    private var deviceLocationMarker: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,6 +82,7 @@ class MainActivity : AppCompatActivity() {
                 val userLongitude = location.longitude
                 centerMapOnLocation(userLatitude, userLongitude)
                 fetchPOIs(userLatitude, userLongitude)
+                addDeviceLocationMarker(userLatitude, userLongitude)
             } else {
                 Snackbar.make(
                     mapView,
@@ -110,6 +113,17 @@ class MainActivity : AppCompatActivity() {
     private fun showRadiusDialog() {
         val dialog = RadiusDialogFragment()
         dialog.show(supportFragmentManager, "RadiusDialogFragment")
+    }
+
+    private fun addDeviceLocationMarker(latitude: Double, longitude: Double) {
+        if (deviceLocationMarker == null) {
+            deviceLocationMarker = Marker(mapView)
+            deviceLocationMarker?.icon = ContextCompat.getDrawable(this, R.drawable.ic_device_location)
+            deviceLocationMarker?.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            mapView.overlays.add(deviceLocationMarker)
+        }
+        deviceLocationMarker?.position = GeoPoint(latitude, longitude)
+        mapView.invalidate() // Refresh the map to show the new marker
     }
 
     override fun onRequestPermissionsResult(
