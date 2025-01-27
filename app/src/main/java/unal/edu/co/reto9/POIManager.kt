@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.delay
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -36,6 +37,15 @@ class POIManager(private val mapView: MapView) {
             } catch (e: Exception) {
                 e.printStackTrace()
                 println("An error occurred: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    fun startRealTimeUpdates(latitude: Double, longitude: Double, radius: Int, amenity: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            while (true) {
+                fetchPOIs(latitude, longitude, radius, amenity)
+                delay(10000) // Espera 10 segundos entre actualizaciones
             }
         }
     }

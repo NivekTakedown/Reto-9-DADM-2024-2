@@ -89,6 +89,8 @@ class MainActivity : AppCompatActivity(), RadiusDialogFragment.RadiusDialogListe
                 centerMapOnLocation(userLatitude, userLongitude)
                 fetchPOIs(userLatitude, userLongitude)
                 addDeviceLocationMarker(userLatitude, userLongitude)
+                val poiManager = POIManager(mapView)
+                poiManager.startRealTimeUpdates(userLatitude, userLongitude, 500, "restaurant")
             } else {
                 Snackbar.make(
                     mapView,
