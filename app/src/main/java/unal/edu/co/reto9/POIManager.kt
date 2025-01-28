@@ -1,5 +1,6 @@
 package unal.edu.co.reto9
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -50,15 +51,40 @@ class POIManager(private val mapView: MapView) {
         }
     }
 
-    private fun addMarker(latitude: Double, longitude: Double, name: String, description: String, amenity: String, openingHours: String, phone: String) {
+    private fun addMarker(
+        latitude: Double,
+        longitude: Double,
+        name: String,
+        rawDescription: String,
+        rawAmenity: String,
+        rawOpeningHours: String,
+        rawPhone: String
+    ) {
         val marker = Marker(mapView)
         marker.position = GeoPoint(latitude, longitude)
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
         marker.title = name
-        marker.snippet = description
-        marker.subDescription = "Amenity: $amenity\nOpening Hours: $openingHours\nPhone: $phone"
+
+        val snippetBuilder = StringBuilder()
+        if (rawDescription != "No description available") {
+            snippetBuilder.append(rawDescription)
+        }
+        marker.snippet = snippetBuilder.toString()
+
+        val subBuilder = StringBuilder()
+        if (rawAmenity != "No amenity available") {
+            subBuilder.append("Amenity: $rawAmenity\n")
+        }
+        if (rawOpeningHours != "No opening hours available") {
+            subBuilder.append("Opening Hours: $rawOpeningHours\n")
+        }
+        if (rawPhone != "No phone number available") {
+            subBuilder.append("Phone: $rawPhone")
+        }
+        marker.subDescription = subBuilder.toString()
+
         marker.infoWindow = CustomInfoWindow(mapView)
         mapView.overlays.add(marker)
-        mapView.invalidate() // Refresh the map to show the new marker
+        mapView.invalidate()
     }
 }
