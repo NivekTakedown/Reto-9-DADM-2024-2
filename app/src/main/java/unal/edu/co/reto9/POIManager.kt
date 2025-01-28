@@ -63,27 +63,29 @@ class POIManager(private val mapView: MapView) {
         val marker = Marker(mapView)
         marker.position = GeoPoint(latitude, longitude)
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+
+        // Title
         marker.title = name
 
-        val snippetBuilder = StringBuilder()
+        // Combine all details into marker snippet to show in default InfoWindow
+        val details = StringBuilder()
         if (rawDescription != "No description available") {
-            snippetBuilder.append(rawDescription)
+            details.appendLine(rawDescription)
         }
-        marker.snippet = snippetBuilder.toString()
-
-        val subBuilder = StringBuilder()
         if (rawAmenity != "No amenity available") {
-            subBuilder.append("Amenity: $rawAmenity\n")
+            details.appendLine("Amenity: $rawAmenity")
         }
         if (rawOpeningHours != "No opening hours available") {
-            subBuilder.append("Opening Hours: $rawOpeningHours\n")
+            details.appendLine("Opening Hours: $rawOpeningHours")
         }
         if (rawPhone != "No phone number available") {
-            subBuilder.append("Phone: $rawPhone")
+            details.appendLine("Phone: $rawPhone")
         }
-        marker.subDescription = subBuilder.toString()
+        marker.snippet = details.toString()
 
-        marker.infoWindow = CustomInfoWindow(mapView)
+        // Remove any custom InfoWindow assignment to use the default
+        // marker.infoWindow = CustomInfoWindow(mapView)
+
         mapView.overlays.add(marker)
         mapView.invalidate()
     }
